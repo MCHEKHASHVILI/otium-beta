@@ -112,8 +112,11 @@ export default {
             if(ethereum && ethereum.isMetaMask){
 
                 ethereum.on('accountsChanged', checkAccounts )
+                
+                await checkAccounts()
 
-                await ethereum.request({ method: 'eth_accounts' })
+
+                // await ethereum.request({ method: 'eth_accounts' })
                 // console.log(accounts)
             }else{
                 // console.log(ethereum)

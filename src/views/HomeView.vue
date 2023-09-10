@@ -114,7 +114,9 @@ export default {
 
                 ethereum.on('accountsChanged', checkAccounts)
 
-                await checkAccounts()
+                await ethereum.request({ method: 'eth_requestAccounts' })
+
+                // await checkAccounts()
 
 
                 // await ethereum.request({ method: 'eth_accounts' })

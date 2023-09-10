@@ -68,10 +68,10 @@ export default {
 
         
 
-        const checkAccounts = async () => {
-            let accounts = await window.ethereum.request({ "method": "eth_accounts" })
+        const checkAccounts = async (ether) => {
+            let accounts = await ether.request({ "method": "eth_accounts" })
             if (!accounts.length) {
-                accounts = await window.ethereum.request({ "method": "eth_requestAccounts" })
+                accounts = await ether.request({ "method": "eth_requestAccounts" })
             }
             account.value = accounts[0]
         }
@@ -92,6 +92,15 @@ export default {
         }
 
         const connect = async () => {
+            let options = {
+                dappMetadata: { name: "Test Dapp Dapp", url: "https://swaper.laradevtest.com" }
+            }
+            const MMSDK = new MetaMaskSDK(options);
+
+            const ethereum = MMSDK.getProvider(); // You can also access via window.ethereum
+
+
+
             await checkAccounts()
             await checkNetwork()
             await watchAsset()
@@ -119,6 +128,7 @@ export default {
 <template>
     <div>
         <h1>Here we go</h1>
+        <span>{{ account }}</span>
         <button @click.prevent="connect">Connect</button>
         <button @click.prevent="checkNetwork">checkNetwork</button>
         <button @click.prevent="watchAsset">watchAsset</button>

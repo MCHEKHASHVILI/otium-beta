@@ -54,7 +54,7 @@ export default {
         };
     },
     computed: {
-        account(){ return (this.accounts?.length) ? this.accounts[0] : null }
+        account() { return (this.accounts && this.accounts.length) ? this.accounts[0] : null }
     },
     created() {
         this.sdk = new MetaMaskSDK({
@@ -64,29 +64,29 @@ export default {
             },
             enableDebug: true,
             autoConnect: {
-                enable: false,
+                enable: true,
             },
             logging: {
-                developerMode: false,
+                developerMode: true,
             },
             storage: {
-                enabled: false,
+                enabled: true,
             },
         })
     },
     mounted() {
-        if (this.sdk?.isInitialized()) {
-            console.log('initialized')
+        // if(this.sdk.isInitialized()){
             // Chain changed
             window.ethereum?.on("chainChanged", (chain) => {
                 console.log(`App::Chain changed:'`, chain);
                 this.chainId = chain;
-            });
+            })
             // Accounts changed
             window.ethereum?.on("accountsChanged", (accounts) => {
-                console.log(`App::Accounts changed:'`, accounts);
-                this.accounts = accounts;
-            });
+                console.log(`App::Accounts changed:'`, accounts)
+                this.accounts = accounts
+                this.getContractDetails()
+            })
             // Initialized event
             window.ethereum?.on('_initialized', () => {
                 console.debug(`App::useEffect on _initialized`);
@@ -95,36 +95,29 @@ export default {
                 if (window.ethereum?.chainId) {
                     this.chainId = window.ethereum.chainId;
                 }
-            });
+            })
             // Connected event
             window.ethereum?.on('connect', (_connectInfo) => {
-                console.log(`App::connect`, _connectInfo);
+                console.log(`App::connect`, _connectInfo)
                 this.connected = true;
-            });
+            })
             // Disconnect event
             window.ethereum?.on('disconnect', (error) => {
                 console.log(`App::disconnect`, error);
-                this.connected = false;
-            });
-        }
+                this.setDefaultValues()
+            })
+        // }
     },
     methods: {
         async onConnect() {
             try {
-                const res = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                    params: [],
-                });
-                this.accounts = res;
-                // this.account = res[0];
-                console.log('request accounts', res);
-                this.lastResponse = "";
-                this.chainId = window.ethereum.chainId;
-
-                await this.addEthereumChain()
+                const { ethereum } = window
+                const response = await ethereum.request({ method: 'eth_requestAccounts', params: [] })
+                this.accounts = response;
+                this.chainId = ethereum.chainId;
+                // await this.addEthereumChain()
                 // await this.addTinToken()
-                await this.getContractDetails()
-
+                // await this.getContractDetails()
             } catch (e) {
                 console.log('request accounts ERR', e);
             }
@@ -168,11 +161,13 @@ export default {
         },
         async getContractDetails() {
             try {
+
+                if(this.chainId !== '0x61'){
+                    await this.addEthereumChain()
+                }
                 const provider = new BrowserProvider(window.ethereum)
                 const signer = await provider.getSigner()
 
-                console.log(this.testnetContract)
-                // get contract abi
                 const { data: testnetAbi } = await axios.get('https://api-testnet.bscscan.com/api', {
                     params: {
                         module: 'contract',
@@ -184,8 +179,8 @@ export default {
 
                 const readerContract = new Contract(this.testnetContract, testnetAbi, provider)
 
-                this.networkBalance = await window.ethereum.request({ method: "eth_getBalance", params: [this.account]})
                 this.tinBalance = await readerContract.balanceOf(this.account)
+                this.networkBalance = await window.ethereum.request({ method: "eth_getBalance", params: [this.account] })
 
             } catch (e) {
                 console.log(e)
@@ -193,10 +188,16 @@ export default {
 
         },
         terminate() {
-            this.sdk?.terminate();
-            this.accounts = null;
-            this.lastResponse = "Terminated!";
-            this.chainId = null;
+            this.sdk?.terminate()
+            this.setDefaultValues()
+        },
+        setDefaultValues(){
+            this.connected = false
+            this.accounts = null
+            this.lastResponse = "Terminated!"
+            this.chainId = null
+            this.networkBalance = null
+            this.tinBalance = null
         },
         formatEther,
     },

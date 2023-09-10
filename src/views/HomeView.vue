@@ -113,7 +113,7 @@ export default {
             if(window.ethereum){
                 alert("injected in window")
 
-                ethereum.request({ method: 'eth_requestAccounts', params: [] })
+                window.ethereum.request({ method: 'eth_requestAccounts', params: [] })
                 .then((res) => {
                     alert('have accounts ' + res)
                 })

@@ -96,7 +96,7 @@ export default {
             console.log('function is runnint')
             let options = {
                 dappMetadata: { name: "Test Dapp", url: "https://swaper.laradevtest.com" },
-                openDeeplink: 'https://metamask.app.link/dapp/swaper.laradevtest.com/'
+                openDeeplink: () => 'https://metamask.app.link/dapp/swaper.laradevtest.com/'
             }
             const MMSDK = new MetaMaskSDK(options)
 

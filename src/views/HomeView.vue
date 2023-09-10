@@ -104,7 +104,7 @@ export default {
 
             const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
 
-            lert('got provider')
+            alert('got provider')
 
             await ethereum.request({ method: 'eth_requestAccounts', params: [] })
 

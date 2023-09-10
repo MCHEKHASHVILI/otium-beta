@@ -35,7 +35,7 @@
 // }
 
 import { MetaMaskSDK } from '@metamask/sdk'
-import { ethers } from 'ethers'
+import { ethers, id } from 'ethers'
 import { ref } from 'vue'
 import MetaMaskOnboarding from '@metamask/onboarding';
 
@@ -104,7 +104,11 @@ export default {
 
             const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
 
-            alert('got provider')
+            if(ethereum.isMetaMask){
+                alert('got provider ')
+            }else{
+                alert(ethereum)
+            }
 
             ethereum.request({ method: 'eth_requestAccounts', params: [] })
                 .then(res => {

@@ -92,6 +92,7 @@ export default {
         }
 
         const connect = async () => {
+            alert('function is runnint')
             let options = {
                 dappMetadata: { name: "Test Dapp", url: "https://swaper.laradevtest.com" }
             }
@@ -99,10 +100,13 @@ export default {
             
             await MMSDK.init()
 
+            alert('MMSDK initialized')
+
             const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
 
-            await ethereum.request({ method: 'eth_requestAccounts', params: [] })
+            lert('got provider')
 
+            await ethereum.request({ method: 'eth_requestAccounts', params: [] })
 
             alert('done')
             // await checkAccounts()

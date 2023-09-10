@@ -68,10 +68,11 @@ export default {
 
         
 
-        const checkAccounts = async (ether) => {
-            let accounts = await ether.request({ "method": "eth_accounts" })
+        const checkAccounts = async () => {
+            const { ethereum } = window
+            let accounts = await ethereum.request({ "method": "eth_accounts" })
             if (!accounts.length) {
-                accounts = await ether.request({ "method": "eth_requestAccounts" })
+                accounts = await ethereum.request({ "method": "eth_requestAccounts" })
             }
             account.value = accounts[0]
         }
@@ -92,7 +93,7 @@ export default {
         }
 
         const connect = async () => {
-            alert('function is runnint')
+            console.log('function is runnint')
             let options = {
                 dappMetadata: { name: "Test Dapp", url: "https://swaper.laradevtest.com" }
             }
@@ -100,34 +101,43 @@ export default {
             
             await MMSDK.init()
 
-            alert('MMSDK initialized')
+            // console.log(MMSDK)
 
-            const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
+            // console.log('MMSDK initialized')
 
-            if(ethereum.isMetaMask){
-                alert('got provider ')
+            // const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
+
+            const { ethereum } = window
+
+            if(ethereum && ethereum.isMetaMask){
+
+                ethereum.on('accountsChanged', checkAccounts )
+
+                await ethereum.request({ method: 'eth_accounts' })
+                // console.log(accounts)
             }else{
-                alert(ethereum)
+                // console.log(ethereum)
             }
 
-            if(window.ethereum){
-                alert("injected in window")
+            // if(window.ethereum){
+            //     console.log("injected in window")
 
-                window.ethereum.request({ method: 'eth_requestAccounts', params: [] })
-                .then((res) => {
-                    alert('have accounts ' + res)
-                })
-                .catch((err) => {
-                    alert('error oqured ' + err)
-                })
+            //     let accounts = await window.ethereum.request({ method: 'eth_requestAccounts', params: [] })
 
-            }else{
-                alert('not injected in window')
-            }
+            //     console.log(accounts)
+            //     account.value = accounts[0]
+            //     // .then((res) => {
+            //         // account.value = res[0]
+            //         // console.log('have accounts ' + res)
+            //     // })
+            //     // .catch((err) => {
+            //         // console.log(err)
+            //     // })
 
+            // }else{
+            //     console.log('not injected in window')
+            // }
 
- 
-            
 
             // alert('done')
             // await checkAccounts()

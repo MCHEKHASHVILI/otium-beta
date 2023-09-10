@@ -34,10 +34,10 @@
 //     }
 // }
 
-// import { MetaMaskSDK } from '@metamask/sdk'
-// import { ethers } from 'ethers'
-// import { ref } from 'vue'
-// import MetaMaskOnboarding from '@metamask/onboarding';
+import { MetaMaskSDK } from '@metamask/sdk'
+import { ethers } from 'ethers'
+import { ref } from 'vue'
+import MetaMaskOnboarding from '@metamask/onboarding';
 
 export default {
     setup(){

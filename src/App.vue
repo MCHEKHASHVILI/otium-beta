@@ -2,6 +2,6 @@
 
 </script>
 <template>
-  <h2>App.vue</h2>
+  <h2>App.vue 2</h2>
   <!-- <RouterView /> -->
 </template>

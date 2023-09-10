@@ -75,38 +75,38 @@ export default {
         })
     },
     mounted() {
-        // if (this.sdk?.isInitialized()) {
-        //     console.log('initialized')
-        //     // Chain changed
-        //     window.ethereum?.on("chainChanged", (chain) => {
-        //         console.log(`App::Chain changed:'`, chain);
-        //         this.chainId = chain;
-        //     });
-        //     // Accounts changed
-        //     window.ethereum?.on("accountsChanged", (accounts) => {
-        //         console.log(`App::Accounts changed:'`, accounts);
-        //         this.accounts = accounts;
-        //     });
-        //     // Initialized event
-        //     window.ethereum?.on('_initialized', () => {
-        //         console.debug(`App::useEffect on _initialized`);
-        //         // Getting the accounts again to display in the UI
-        //         this.onConnect();
-        //         if (window.ethereum?.chainId) {
-        //             this.chainId = window.ethereum.chainId;
-        //         }
-        //     });
-        //     // Connected event
-        //     window.ethereum?.on('connect', (_connectInfo) => {
-        //         console.log(`App::connect`, _connectInfo);
-        //         this.connected = true;
-        //     });
-        //     // Disconnect event
-        //     window.ethereum?.on('disconnect', (error) => {
-        //         console.log(`App::disconnect`, error);
-        //         this.connected = false;
-        //     });
-        // }
+        if (this.sdk?.isInitialized()) {
+            console.log('initialized')
+            // Chain changed
+            window.ethereum?.on("chainChanged", (chain) => {
+                console.log(`App::Chain changed:'`, chain);
+                this.chainId = chain;
+            });
+            // Accounts changed
+            window.ethereum?.on("accountsChanged", (accounts) => {
+                console.log(`App::Accounts changed:'`, accounts);
+                this.accounts = accounts;
+            });
+            // Initialized event
+            window.ethereum?.on('_initialized', () => {
+                console.debug(`App::useEffect on _initialized`);
+                // Getting the accounts again to display in the UI
+                this.onConnect();
+                if (window.ethereum?.chainId) {
+                    this.chainId = window.ethereum.chainId;
+                }
+            });
+            // Connected event
+            window.ethereum?.on('connect', (_connectInfo) => {
+                console.log(`App::connect`, _connectInfo);
+                this.connected = true;
+            });
+            // Disconnect event
+            window.ethereum?.on('disconnect', (error) => {
+                console.log(`App::disconnect`, error);
+                this.connected = false;
+            });
+        }
     },
     methods: {
         async onConnect() {

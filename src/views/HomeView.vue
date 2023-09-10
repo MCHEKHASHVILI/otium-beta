@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { MetaMaskSDK } from '@metamask/sdk'
 import { BrowserProvider, Contract, formatEther } from 'ethers'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onServerPrefetch } from 'vue'
 
 const sdk = new MetaMaskSDK({
     dappMetadata: {
@@ -23,7 +23,7 @@ const sdk = new MetaMaskSDK({
 
 const accounts = ref(null)
 const chainId = ref(null)
-const connected = ref(null)
+const connected = ref(false)
 const networkBalance = ref(null)
 const tinBalance = ref(null)
 const testnetContract = ref('0x936bd2C380ddE7FCECD58e3a90DA324981CDB572')
@@ -55,10 +55,11 @@ function handleChainIdChanged(newChainId) {
 }
 
 function handleConnect(_connectInfo) {
-    connected.value = true
+    connected.value = window.ethereum.isConnected()
 }
 
 function handleDisconnect() {
+    connected.value = window.ethereum.isConnected()
     setDefaultValues()
 }
 
@@ -104,7 +105,7 @@ async function watchAsset() {
 }
 async function getAssetsBalance() {
     try {
-        if (chainId !== '0x61') {
+        if (chainId.value !== '0x61') {
             await addEthereumChain()
         }
         const provider = new BrowserProvider(window.ethereum)
@@ -117,8 +118,8 @@ async function getAssetsBalance() {
             }
         })
         const readerContract = new Contract(testnetContract.value, testnetAbi, provider)
-        tinBalance.value = await readerContract.balanceOf(account)
-        networkBalance.value = await window.ethereum.request({ method: "eth_getBalance", params: [account] })
+        tinBalance.value = await readerContract.balanceOf(account.value)
+        networkBalance.value = await window.ethereum.request({ method: "eth_getBalance", params: [account.value] })
 
     } catch (e) {
         console.log(e)
@@ -137,6 +138,12 @@ function setDefaultValues(error) {
     networkBalance.value = null
     tinBalance.value = null
 }
+onServerPrefetch(() => {
+    if(window.ethereum?.isConnected()){
+        accounts.value = window.ethereum.request({method: "eth_accounts", params: []})
+        getAssetsBalance()
+    }
+})
 onMounted(() => {
     // if (sdk.isInitialized()) {
         window.ethereum?.on("chainChanged", handleChainIdChanged)
@@ -144,6 +151,7 @@ onMounted(() => {
         window.ethereum?.on('connect', handleConnect)
         window.ethereum?.on('disconnect', handleDisconnect)
         window.ethereum?.on('_initialized', handleInitialized)
+        
     // }
 })
 </script>

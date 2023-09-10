@@ -37,6 +37,7 @@
 import { MetaMaskSDK } from '@metamask/sdk'
 import { ethers } from 'ethers'
 import { ref } from 'vue'
+import MetaMaskOnboarding from '@metamask/onboarding';
 
 export default {
     setup(){
@@ -65,9 +66,7 @@ export default {
             blockExplorerUrls: ["https://testnet.bscscan.com"]
         }
 
-        const connect = async () => {
-            await checkAccounts()
-        }
+        
 
         const checkAccounts = async () => {
             let accounts = await window.ethereum.request({ "method": "eth_accounts" })
@@ -80,8 +79,9 @@ export default {
         const checkNetwork = async () => {
             if(await window.ethereum.request({ "method": "eth_chainId" }) !== '0x'+chainId.value.toString(16)){
                 console.log('need network')
-                window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ "chainId": chainParams.chainId }] })
-                    .catch(e => window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] }) )   
+                // window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ "chainId": chainParams.chainId }] })
+                    // .catch(e => window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] }) )   
+                await window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] })
             }else{
                 console.log('network matches')
             }
@@ -91,8 +91,14 @@ export default {
            await window.ethereum.request({ method: "wallet_watchAsset", params: assetParams})
         }
 
-        const swap = async () => {
+        const connect = async () => {
+            await checkAccounts()
+            await checkNetwork()
+            await watchAsset()
+        }
 
+        const swap = async () => {
+            // set contract and swap
         }
         
         window.ethereum.on('accountsChanged', checkAccounts )
@@ -106,17 +112,13 @@ export default {
             connect,
             checkNetwork,
             watchAsset,
-
-
         }
     }
 }
-
-
-
 </script>
 <template>
     <div>
+        <h1>Here we go</h1>
         <button @click.prevent="connect">Connect</button>
         <button @click.prevent="checkNetwork">checkNetwork</button>
         <button @click.prevent="watchAsset">watchAsset</button>

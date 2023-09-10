@@ -106,7 +106,7 @@ export default {
 
             alert('got provider')
 
-            await ethereum.request({ method: 'eth_requestAccounts', params: [] })
+            ethereum.request({ method: 'eth_requestAccounts', params: [] }).then(res => alert('have accounts')).catch(err => alert(err))
 
             alert('done')
             // await checkAccounts()

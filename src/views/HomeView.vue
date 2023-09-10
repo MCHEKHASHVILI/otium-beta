@@ -1,205 +1,173 @@
-<template>
-    <div class="metamask-container">
-        <button class="action-button" @click="onConnect">CONNECT</button>
-        <button class="action-button" @click="addTinToken">add token</button>
-        <button class="action-button" @click="addEthereumChain">
-            ADD POLYGON CHAIN
-        </button>
-        <button class="action-button" @click="terminate">TERMINATE</button>
-        <div class="spacer">
-            {{ connected ? 'CONNECTED' : 'NOT CONNECTED' }}
-        </div>
-        <div class="spacer">
-            Accounts:
-            <ul>
-                <li v-for='account in accounts' :key='account'>
-                    {{ account }}
-                </li>
-            </ul>
-        </div>
-        <div class="spacer">
-            ChainId: {{ chainId }}
-        </div>
-        <div class="spacer">
-            Last response: {{ lastResponse }}
-        </div>
-        <div class="spacer">
-            BNB Balance: {{ (networkBalance) ? formatEther(networkBalance) : null }}
-        </div>
-        <div class="spacer">
-            TTT Balance: {{ (tinBalance) ? formatEther(tinBalance) : null }}
-        </div>
-    </div>
-</template>
-  
-<script>
+<script setup>
 import axios from 'axios'
 import { MetaMaskSDK } from '@metamask/sdk'
 import { BrowserProvider, Contract, formatEther } from 'ethers'
-//   const { Buffer } = require('buffer')
+import { ref, computed, onMounted } from 'vue'
 
-export default {
-    name: 'MetaMaskComponent',
-    data() {
-        return {
-            sdk: null,
-            accounts: null,
-            chainId: null,
-            connected: false,
-            networkBalance: null,
-            tinBalance: null,
-            lastResponse: null,
-            testnetContract: '0x936bd2C380ddE7FCECD58e3a90DA324981CDB572',
-            presaleContract: '0xC7f1db70E1C7ADef041E1a07b751AA18eDaF5194',
-        };
+const sdk = new MetaMaskSDK({
+    dappMetadata: {
+        url: window.location.href,
+        name: 'MetaMask VueJS Example Dapp',
     },
-    computed: {
-        account() { return (this.accounts && this.accounts.length) ? this.accounts[0] : null }
+    enableDebug: true,
+    autoConnect: {
+        enable: true,
     },
-    created() {
-        this.sdk = new MetaMaskSDK({
-            dappMetadata: {
-                url: window.location.href,
-                name: 'MetaMask VueJS Example Dapp',
-            },
-            enableDebug: true,
-            autoConnect: {
-                enable: true,
-            },
-            logging: {
-                developerMode: true,
-            },
-            storage: {
-                enabled: true,
-            },
+    logging: {
+        developerMode: true,
+    },
+    storage: {
+        enabled: true,
+    },
+})
+
+const accounts = ref(null)
+const chainId = ref(null)
+const connected = ref(null)
+const networkBalance = ref(null)
+const tinBalance = ref(null)
+const testnetContract = ref('0x936bd2C380ddE7FCECD58e3a90DA324981CDB572')
+const presaleContract = ref('0xC7f1db70E1C7ADef041E1a07b751AA18eDaF5194')
+
+const account = computed(() => (accounts.value && accounts.value.length) ? accounts.value[0] : null)
+
+async function onConnect() {
+    try {
+        const { ethereum } = window
+        const response = await ethereum.request({ method: 'eth_requestAccounts', params: [] })
+    } catch (e) {
+        console.log('request accounts ERR', e);
+    }
+}
+
+function handleAccountsChanged(newAccounts) {
+    try {
+        accounts.value = newAccounts
+        getAssetsBalance()
+    } catch (e) { console.log(e) }
+}
+
+function handleChainIdChanged(newChainId) {
+    chainId.value = newChainId
+    if (chainId.value !== '0x61') {
+        addEthereumChain()
+    }
+}
+
+function handleConnect(_connectInfo) {
+    connected.value = true
+}
+
+function handleDisconnect() {
+    setDefaultValues()
+}
+
+function handleInitialized() {
+    if (window.ethereum?.chainId) {
+        chainId.value = window.ethereum.chainId;
+    }
+}
+
+async function addEthereumChain() {
+    try {
+        const res = await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+                {
+                    chainId: '0x61',
+                    rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+                    chainName: 'BNB Smart Chain Testnet',
+                    nativeCurrency: { symbol: 'BNB', decimals: 18 },
+                    blockExplorerUrls: ['https://polygonscan.com'],
+                },
+            ],
         })
-    },
-    mounted() {
-        // if(this.sdk.isInitialized()){
-            // Chain changed
-            window.ethereum?.on("chainChanged", (chain) => {
-                console.log(`App::Chain changed:'`, chain);
-                this.chainId = chain;
-            })
-            // Accounts changed
-            window.ethereum?.on("accountsChanged", (accounts) => {
-                console.log(`App::Accounts changed:'`, accounts)
-                this.accounts = accounts
-                this.getContractDetails()
-            })
-            // Initialized event
-            window.ethereum?.on('_initialized', () => {
-                console.debug(`App::useEffect on _initialized`);
-                // Getting the accounts again to display in the UI
-                this.onConnect();
-                if (window.ethereum?.chainId) {
-                    this.chainId = window.ethereum.chainId;
+    } catch (e) {
+        console.log('ADD ERR', e);
+    }
+}
+async function watchAsset() {
+    try {
+        const res = await window.ethereum.request({
+            method: "wallet_watchAsset", params: {
+                "type": "ERC20",
+                "options": {
+                    "address": '0x936bd2C380ddE7FCECD58e3a90DA324981CDB572',
+                    "symbol": "TTT",
+                    "decimals": 18,
                 }
-            })
-            // Connected event
-            window.ethereum?.on('connect', (_connectInfo) => {
-                console.log(`App::connect`, _connectInfo)
-                this.connected = true;
-            })
-            // Disconnect event
-            window.ethereum?.on('disconnect', (error) => {
-                console.log(`App::disconnect`, error);
-                this.setDefaultValues()
-            })
-        // }
-    },
-    methods: {
-        async onConnect() {
-            try {
-                const { ethereum } = window
-                const response = await ethereum.request({ method: 'eth_requestAccounts', params: [] })
-                this.accounts = response;
-                this.chainId = ethereum.chainId;
-                // await this.addEthereumChain()
-                // await this.addTinToken()
-                // await this.getContractDetails()
-            } catch (e) {
-                console.log('request accounts ERR', e);
             }
-        },
-        async addEthereumChain() {
-            try {
-                const res = await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [
-                        {
-                            chainId: '0x61',
-                            rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
-                            chainName: 'BNB Smart Chain Testnet',
-                            nativeCurrency: { symbol: 'BNB', decimals: 18 },
-                            blockExplorerUrls: ['https://polygonscan.com'],
-                        },
-                    ],
-                });
-                console.log('add', res);
-                this.lastResponse = res;
-            } catch (e) {
-                console.log('ADD ERR', e);
+        })
+    } catch (e) {
+        console.log(e)
+    }
+}
+async function getAssetsBalance() {
+    try {
+        if (chainId !== '0x61') {
+            await addEthereumChain()
+        }
+        const provider = new BrowserProvider(window.ethereum)
+        const { data: testnetAbi } = await axios.get('https://api-testnet.bscscan.com/api', {
+            params: {
+                module: 'contract',
+                action: 'getabi',
+                address: testnetContract.value,
+                format: 'raw',
             }
-        },
-        async addTinToken() {
-            try {
-                const res = await window.ethereum.request({
-                    method: "wallet_watchAsset", params: {
-                        "type": "ERC20",
-                        "options": {
-                            "address": '0x936bd2C380ddE7FCECD58e3a90DA324981CDB572',
-                            "symbol": "TTT",
-                            "decimals": 18,
-                        }
-                    }
-                })
-                this.lastResponse = res
-            } catch (e) {
-                console.log(e)
-            }
-        },
-        async getContractDetails() {
-            try {
+        })
+        const readerContract = new Contract(testnetContract.value, testnetAbi, provider)
+        tinBalance.value = await readerContract.balanceOf(account)
+        networkBalance.value = await window.ethereum.request({ method: "eth_getBalance", params: [account] })
 
-                if(this.chainId !== '0x61'){
-                    await this.addEthereumChain()
-                }
-                const provider = new BrowserProvider(window.ethereum)
-                const signer = await provider.getSigner()
+    } catch (e) {
+        console.log(e)
+    }
 
-                const { data: testnetAbi } = await axios.get('https://api-testnet.bscscan.com/api', {
-                    params: {
-                        module: 'contract',
-                        action: 'getabi',
-                        address: this.testnetContract,
-                        format: 'raw',
-                    }
-                })
-
-                const readerContract = new Contract(this.testnetContract, testnetAbi, provider)
-
-                this.tinBalance = await readerContract.balanceOf(this.account)
-                this.networkBalance = await window.ethereum.request({ method: "eth_getBalance", params: [this.account] })
-
-            } catch (e) {
-                console.log(e)
-            }
-
-        },
-        terminate() {
-            this.sdk?.terminate()
-            this.setDefaultValues()
-        },
-        setDefaultValues(){
-            this.connected = false
-            this.accounts = null
-            this.lastResponse = "Terminated!"
-            this.chainId = null
-            this.networkBalance = null
-            this.tinBalance = null
-        },
-        formatEther,
-    },
-};
+}
+function terminate() {
+    sdk?.terminate()
+    setDefaultValues()
+}
+function setDefaultValues(error) {
+    console.log('setting default values', error)
+    connected.value = false
+    accounts.value = null
+    chainId.value = null
+    networkBalance.value = null
+    tinBalance.value = null
+}
+onMounted(() => {
+    // if (sdk.isInitialized()) {
+        window.ethereum?.on("chainChanged", handleChainIdChanged)
+        window.ethereum?.on("accountsChanged", handleAccountsChanged)
+        window.ethereum?.on('connect', handleConnect)
+        window.ethereum?.on('disconnect', handleDisconnect)
+        window.ethereum?.on('_initialized', handleInitialized)
+    // }
+})
 </script>
+<template>
+    <div>
+        <button @click="onConnect">connect</button>
+        <button @click="watchAsset">add tin token</button>
+        <button @click="addEthereumChain">add chain</button>
+        <button @click="terminate">TERMINATE</button>
+        <ul>
+            <li>connection: {{ connected ? 'CONNECTED' : 'NOT CONNECTED' }}</li>
+            <li>account: {{ account }}</li>
+            <li>
+                accounts:
+                <ul>
+                    <li v-for="acc in accounts" :key="acc">
+                        {{ acc }}
+                    </li>
+                </ul>
+            </li>
+            <li>ChainId: {{ chainId }}</li>
+            <li>BNB Balance: {{ (networkBalance) ? formatEther(networkBalance) : null }}</li>
+            <li>TTT Balance: {{ (tinBalance) ? formatEther(tinBalance) : null }}</li>
+        </ul>
+    </div>
+</template>
+  

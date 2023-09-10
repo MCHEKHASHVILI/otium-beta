@@ -96,10 +96,12 @@ export default {
                 dappMetadata: { name: "Test Dapp", url: "https://swaper.laradevtest.com" }
             }
             const MMSDK = new MetaMaskSDK(options)
+            
+            await MMSDK.init()
 
             const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
 
-            ethereum.request({ method: 'eth_requestAccounts', params: [] })
+            // ethereum.request({ method: 'eth_requestAccounts', params: [] })
 
 
 

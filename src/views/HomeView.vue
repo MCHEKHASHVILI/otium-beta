@@ -109,14 +109,25 @@ export default {
             }else{
                 alert(ethereum)
             }
- 
-            ethereum.request({ method: 'eth_requestAccounts', params: [] })
-                .then(res => {
+
+            if(window.ethereum){
+                alert("injected in window")
+
+                ethereum.request({ method: 'eth_requestAccounts', params: [] })
+                .then((res) => {
                     alert('have accounts ' + res)
                 })
-                .catch(err => {
+                .catch((err) => {
                     alert('error oqured ' + err)
                 })
+
+            }else{
+                alert('not injected in window')
+            }
+
+
+ 
+            
 
             // alert('done')
             // await checkAccounts()

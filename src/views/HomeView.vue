@@ -34,94 +34,94 @@
 //     }
 // }
 
-import { MetaMaskSDK } from '@metamask/sdk'
-import { ethers } from 'ethers'
-import { ref } from 'vue'
-import MetaMaskOnboarding from '@metamask/onboarding';
+// import { MetaMaskSDK } from '@metamask/sdk'
+// import { ethers } from 'ethers'
+// import { ref } from 'vue'
+// import MetaMaskOnboarding from '@metamask/onboarding';
 
-export default {
-    setup(){
-        const chainId = ref(97)
-        const account = ref('')
+// export default {
+//     setup(){
+//         const chainId = ref(97)
+//         const account = ref('')
 
-        const assetParams = {
-            "type": "ERC20",
-            "options": {
-                "address": "0x936bd2C380ddE7FCECD58e3a90DA324981CDB572",
-                "symbol": "TTT",
-                "decimals": 18,
-                // "image": "https://foo.io/token-image.svg"
-            }
-        }
+//         const assetParams = {
+//             "type": "ERC20",
+//             "options": {
+//                 "address": "0x936bd2C380ddE7FCECD58e3a90DA324981CDB572",
+//                 "symbol": "TTT",
+//                 "decimals": 18,
+//                 // "image": "https://foo.io/token-image.svg"
+//             }
+//         }
 
-        const chainParams = {
-            chainId: '0x' + chainId.value.toString(16),
-            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-            chainName: "BNB Smart Chain Testnet",
-            nativeCurrency: {
-                name: "Test BNB",
-                symbol: "BNB",
-                decimals: 18
-            },
-            blockExplorerUrls: ["https://testnet.bscscan.com"]
-        }
+//         const chainParams = {
+//             chainId: '0x' + chainId.value.toString(16),
+//             rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+//             chainName: "BNB Smart Chain Testnet",
+//             nativeCurrency: {
+//                 name: "Test BNB",
+//                 symbol: "BNB",
+//                 decimals: 18
+//             },
+//             blockExplorerUrls: ["https://testnet.bscscan.com"]
+//         }
 
         
 
-        const checkAccounts = async () => {
-            let accounts = await window.ethereum.request({ "method": "eth_accounts" })
-            if (!accounts.length) {
-                accounts = await window.ethereum.request({ "method": "eth_requestAccounts" })
-            }
-            account.value = accounts[0]
-        }
+//         const checkAccounts = async () => {
+//             let accounts = await window.ethereum.request({ "method": "eth_accounts" })
+//             if (!accounts.length) {
+//                 accounts = await window.ethereum.request({ "method": "eth_requestAccounts" })
+//             }
+//             account.value = accounts[0]
+//         }
 
-        const checkNetwork = async () => {
-            if(await window.ethereum.request({ "method": "eth_chainId" }) !== '0x'+chainId.value.toString(16)){
-                console.log('need network')
-                // window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ "chainId": chainParams.chainId }] })
-                    // .catch(e => window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] }) )   
-                await window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] })
-            }else{
-                console.log('network matches')
-            }
-        }
+//         const checkNetwork = async () => {
+//             if(await window.ethereum.request({ "method": "eth_chainId" }) !== '0x'+chainId.value.toString(16)){
+//                 console.log('need network')
+//                 // window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ "chainId": chainParams.chainId }] })
+//                     // .catch(e => window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] }) )   
+//                 await window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] })
+//             }else{
+//                 console.log('network matches')
+//             }
+//         }
 
-        const watchAsset = async () => {
-           await window.ethereum.request({ method: "wallet_watchAsset", params: assetParams})
-        }
+//         const watchAsset = async () => {
+//            await window.ethereum.request({ method: "wallet_watchAsset", params: assetParams})
+//         }
 
-        const connect = async () => {
-            await checkAccounts()
-            await checkNetwork()
-            await watchAsset()
-        }
+//         const connect = async () => {
+//             await checkAccounts()
+//             await checkNetwork()
+//             await watchAsset()
+//         }
 
-        const swap = async () => {
-            // set contract and swap
-        }
+//         const swap = async () => {
+//             // set contract and swap
+//         }
         
-        window.ethereum.on('accountsChanged', checkAccounts )
-        window.ethereum.on('ccheckAssetsged', (chainChanged) => { console.log('chainChanged', chainChanged) })
-        window.ethereum.on('connect', (connect) => { console.log('connect', connect) })
-        window.ethereum.on('disconnect', (disconnect) => { console.log('disconnect', disconnect) })
-        window.ethereum.on('message', (message) => { console.log('message', message) })
+//         window.ethereum.on('accountsChanged', checkAccounts )
+//         window.ethereum.on('ccheckAssetsged', (chainChanged) => { console.log('chainChanged', chainChanged) })
+//         window.ethereum.on('connect', (connect) => { console.log('connect', connect) })
+//         window.ethereum.on('disconnect', (disconnect) => { console.log('disconnect', disconnect) })
+//         window.ethereum.on('message', (message) => { console.log('message', message) })
 
-        return {
-            account,
-            connect,
-            checkNetwork,
-            watchAsset,
-        }
-    }
-}
+//         return {
+//             account,
+//             connect,
+//             checkNetwork,
+//             watchAsset,
+//         }
+//     }
+// }
 </script>
 <template>
     <div>
         <h1>Here we go</h1>
-        <button @click.prevent="connect">Connect</button>
+        <!-- <button @click.prevent="connect">Connect</button>
         <button @click.prevent="checkNetwork">checkNetwork</button>
-        <button @click.prevent="watchAsset">watchAsset</button>
+        <button @click.prevent="watchAsset">watchAsset</button> -->
     </div>
     <!-- <div class="d-flex flex-column justify-content-between">
         <div class="w-100 p-4 bg-white rounded mb-2">

@@ -40,7 +40,7 @@ import { ref } from 'vue'
 import MetaMaskOnboarding from '@metamask/onboarding';
 
 export default {
-    setup(){
+    setup() {
         const chainId = ref(97)
         const account = ref('')
 
@@ -66,7 +66,7 @@ export default {
             blockExplorerUrls: ["https://testnet.bscscan.com"]
         }
 
-        
+
 
         const checkAccounts = async () => {
             const { ethereum } = window
@@ -78,27 +78,28 @@ export default {
         }
 
         const checkNetwork = async () => {
-            if(await window.ethereum.request({ "method": "eth_chainId" }) !== '0x'+chainId.value.toString(16)){
+            if (await window.ethereum.request({ "method": "eth_chainId" }) !== '0x' + chainId.value.toString(16)) {
                 console.log('need network')
                 // window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ "chainId": chainParams.chainId }] })
-                    // .catch(e => window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] }) )   
+                // .catch(e => window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] }) )   
                 await window.ethereum.request({ method: "wallet_addEthereumChain", params: [chainParams] })
-            }else{
+            } else {
                 console.log('network matches')
             }
         }
 
         const watchAsset = async () => {
-           await window.ethereum.request({ method: "wallet_watchAsset", params: assetParams})
+            await window.ethereum.request({ method: "wallet_watchAsset", params: assetParams })
         }
 
         const connect = async () => {
             console.log('function is runnint')
             let options = {
-                dappMetadata: { name: "Test Dapp", url: "https://swaper.laradevtest.com" }
+                dappMetadata: { name: "Test Dapp", url: "https://swaper.laradevtest.com" },
+                openDeeplink: 'https://metamask.app.link/dapp/swaper.laradevtest.com/'
             }
             const MMSDK = new MetaMaskSDK(options)
-            
+
             await MMSDK.init()
 
             // console.log(MMSDK)
@@ -109,16 +110,16 @@ export default {
 
             const { ethereum } = window
 
-            if(ethereum && ethereum.isMetaMask){
+            if (ethereum && ethereum.isMetaMask) {
 
-                ethereum.on('accountsChanged', checkAccounts )
-                
+                ethereum.on('accountsChanged', checkAccounts)
+
                 await checkAccounts()
 
 
                 // await ethereum.request({ method: 'eth_accounts' })
                 // console.log(accounts)
-            }else{
+            } else {
                 // console.log(ethereum)
             }
 
@@ -151,7 +152,7 @@ export default {
         const swap = async () => {
             // set contract and swap
         }
-        
+
         // window.ethereum.on('accountsChanged', checkAccounts )
         // window.ethereum.on('ccheckAssetsged', (chainChanged) => { console.log('chainChanged', chainChanged) })
         // window.ethereum.on('connect', (connect) => { console.log('connect', connect) })

@@ -93,17 +93,19 @@ export default {
 
         const connect = async () => {
             let options = {
-                dappMetadata: { name: "Test Dapp Dapp", url: "https://swaper.laradevtest.com" }
+                dappMetadata: { name: "Test Dapp", url: "https://swaper.laradevtest.com" }
             }
-            const MMSDK = new MetaMaskSDK(options);
+            const MMSDK = new MetaMaskSDK(options)
 
-            const ethereum = MMSDK.getProvider(); // You can also access via window.ethereum
+            const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
+
+            ethereum.request({ method: 'eth_requestAccounts', params: [] })
 
 
 
-            await checkAccounts()
-            await checkNetwork()
-            await watchAsset()
+            // await checkAccounts()
+            // await checkNetwork()
+            // await watchAsset()
         }
 
         const swap = async () => {

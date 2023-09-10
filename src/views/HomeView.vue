@@ -109,7 +109,7 @@ export default {
             }else{
                 alert(ethereum)
             }
-
+ 
             ethereum.request({ method: 'eth_requestAccounts', params: [] })
                 .then(res => {
                     alert('have accounts ' + res)

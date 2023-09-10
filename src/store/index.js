@@ -4,7 +4,7 @@ import swapper from './modules/swapperModule'
 
 const store = createStore({
     modules: { 
-        swapper
+        // swapper
     }
 })
 

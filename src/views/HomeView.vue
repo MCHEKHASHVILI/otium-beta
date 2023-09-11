@@ -56,6 +56,7 @@ function handleChainIdChanged(newChainId) {
 
 function handleConnect(connectInfo) {
     connected.value = window.ethereum.isConnected()
+    getAssetsBalance()
     console.log(connectInfo)
 }
 

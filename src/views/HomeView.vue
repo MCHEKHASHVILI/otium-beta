@@ -54,8 +54,9 @@ function handleChainIdChanged(newChainId) {
     }
 }
 
-function handleConnect(_connectInfo) {
+function handleConnect(connectInfo) {
     connected.value = window.ethereum.isConnected()
+    console.log(connectInfo)
 }
 
 function handleDisconnect() {
@@ -103,11 +104,15 @@ async function watchAsset() {
         console.log(e)
     }
 }
-async function getAssetsBalance() {
+
+async function getNetworkBalance() {
     try {
-        if (chainId.value !== '0x61') {
-            await addEthereumChain()
-        }
+        networkBalance.value = await window.ethereum.request({ method: "eth_getBalance", params: [account.value] })
+    } catch (e) { console.log(e) }
+}
+
+async function getTokenBalance() {
+    try {
         const provider = new BrowserProvider(window.ethereum)
         const { data: testnetAbi } = await axios.get('https://api-testnet.bscscan.com/api', {
             params: {
@@ -119,13 +124,15 @@ async function getAssetsBalance() {
         })
         const readerContract = new Contract(testnetContract.value, testnetAbi, provider)
         tinBalance.value = await readerContract.balanceOf(account.value)
-        networkBalance.value = await window.ethereum.request({ method: "eth_getBalance", params: [account.value] })
 
-    } catch (e) {
-        console.log(e)
-    }
-
+    } catch (e) { console.log(e) }
 }
+
+async function getAssetsBalance() {
+    await getNetworkBalance()
+    await getTokenBalance()
+}
+
 function terminate() {
     sdk?.terminate()
     setDefaultValues()
@@ -138,21 +145,22 @@ function setDefaultValues(error) {
     networkBalance.value = null
     tinBalance.value = null
 }
-onServerPrefetch(() => {
-    if(window.ethereum?.isConnected()){
-        accounts.value = window.ethereum.request({method: "eth_accounts", params: []})
-        getAssetsBalance()
-    }
-})
+// onServerPrefetch(() => {
+//     if(window.ethereum?.isConnected()){
+//         accounts.value = window.ethereum.request({method: "eth_accounts", params: []})
+//         getAssetsBalance()
+//     }
+// })
 onMounted(() => {
-    // if (sdk.isInitialized()) {
-        window.ethereum?.on("chainChanged", handleChainIdChanged)
-        window.ethereum?.on("accountsChanged", handleAccountsChanged)
-        window.ethereum?.on('connect', handleConnect)
-        window.ethereum?.on('disconnect', handleDisconnect)
-        window.ethereum?.on('_initialized', handleInitialized)
-        
-    // }
+    setTimeout(() => {
+        if (sdk.isInitialized()) {
+            window.ethereum?.on("chainChanged", handleChainIdChanged)
+            window.ethereum?.on("accountsChanged", handleAccountsChanged)
+            window.ethereum?.on('connect', handleConnect)
+            window.ethereum?.on('disconnect', handleDisconnect)
+            window.ethereum?.on('initialized', handleInitialized)
+        }
+    }, 1000)
 })
 </script>
 <template>

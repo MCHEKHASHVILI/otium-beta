@@ -123,7 +123,8 @@ async function getTokenBalance() {
             }
         })
         const readerContract = new Contract(testnetContract.value, testnetAbi, provider)
-        tinBalance.value = await readerContract.balanceOf(account.value)
+        let bal = await readerContract.balanceOf(account.value)
+        tinBalance.value = bal ?? 'there is no balance'
 
     } catch (e) { console.log(e) }
 }
